@@ -1,6 +1,8 @@
 import { config as configureEnv } from 'dotenv';
 import knex from 'knex';
 
+import { example } from './example';
+
 configureEnv();
 
 const action = process.argv[2];
@@ -18,6 +20,10 @@ if (action === 'pg') {
         .then(() => process.exit(0));
       break;
   }
+}
+
+if (action === 'example') {
+  getDb().then(db => example(db)).then(() => process.exit(0));
 }
 
 async function getDb() {
