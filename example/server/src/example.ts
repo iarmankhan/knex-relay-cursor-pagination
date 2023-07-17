@@ -1,5 +1,10 @@
 import { Knex } from 'knex';
 
+type a = Knex.Where;
+type ComparisonOperator = '=' | '>' | '>=' | '<' | '<=' | '<>';
+type WhereParams = [string, ComparisonOperator, Knex.QueryBuilder]
+
+
 import { createPagination } from '../../../src/knex-relay-cursor-pagination';
 
 const table = 'people';
@@ -18,14 +23,15 @@ export async function example(db: Knex) {
     before: id,
   });
 
+
   const records = await db
     .from(table)
-    .where(...(pagination.where as [any, any, any]))
-    .orderBy(...pagination.orderBy)
-    .limit(pagination.limit)
+    .where(pagination.where.column, pagination.where.comparator, pagination.where.value)
+    .orderBy(pagination.orderBy.column, pagination.orderBy.direction)
     .select('*')
 
-  console.log(records.reverse());
+  console.log(records)
+  // console.log(records.reverse());
 }
 
 

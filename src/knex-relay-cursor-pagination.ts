@@ -42,11 +42,18 @@ export interface Predicate {
 
 export type Cursor = Knex.Value;
 
-export type OrderBy = [string, SortDirection];
+export type OrderBy = {
+  column: string;
+  direction: SortDirection;
+};
 
 export type SortDirection = 'asc' | 'desc';
 
-export type Where = XOR<[string, string, Cursor], [true]>;
+export type Where = {
+  column: string;
+  comparator: Comparator;
+  value: (b: Knex.QueryBuilder) => Knex.QueryBuilder;
+};
 
 export function createPagination(params: PaginationParams) {
   const {
@@ -61,23 +68,35 @@ export function createPagination(params: PaginationParams) {
   const comparator = getComparator(params.sortDirection, paginationSliceParams.direction);
   const sortDirection = getSortDirection(params.sortDirection, paginationSliceParams.direction);
 
-  const orderBy: OrderBy = [params.sortField, sortDirection];
+  const orderBy: OrderBy = {
+    column: params.sortField,
+    direction: sortDirection,
+  };
   const returnableLimit = paginationSliceParams.limit;
   const queryableLimit = paginationSliceParams.limit + 1;
 
   const where = ((): Where => {
     if (paginationSliceParams.cursor === undefined) {
-      return [true];
+      // this is a noop where-clause value that can
+      // be passed to knex .where in same way as the
+      // non-noop where-clause value and still work
+      return {
+        column: (q: Knex.QueryBuilder) => q,
+        comparator: '>',
+        value: 0
+      } as unknown as Where;
     }
 
-    return [
-      params.sortField,
-      comparator,
-      subquery => subquery
-        .from(params.table)
-        .select(params.sortField)
-        .where(params.cursorField, '=', paginationSliceParams.cursor)
-    ];
+    const subquery = (subquery: Knex.QueryBuilder): Knex.QueryBuilder => subquery
+      .from(params.table)
+      .select(params.sortField)
+      .where(params.cursorField, '=', paginationSliceParams.cursor as Knex.Value);
+
+    return {
+      column: params.sortField,
+      comparator: comparator,
+      value: subquery,
+    };
   })();
 
   const predicate: Predicate = {
@@ -86,8 +105,35 @@ export function createPagination(params: PaginationParams) {
     where
   };
 
+  const getRows = (rows: unknown[]) => {
+    if (rows.length === 0) {
+      return [];
+    }
+
+    if (rows.length <= returnableLimit) {
+      return rows;
+    }
+
+    if (rows.length === queryableLimit) {
+      const returnableItems = [...rows];
+
+      if (paginationSliceParams.direction === 'forward'){
+        returnableItems.pop();
+        return returnableItems;
+      }
+
+      if (paginationSliceParams.direction === 'backward') {
+        returnableItems.shift();
+        return returnableItems;
+      }
+    }
+
+    throw new Error('invalid state for getRows');
+  };
+
   return {
     ...predicate,
+    getRows,
   }
 }
 
