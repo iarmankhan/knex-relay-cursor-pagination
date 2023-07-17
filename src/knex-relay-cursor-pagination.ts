@@ -50,21 +50,18 @@ export type Where = XOR<[string, string, Cursor], [true]>;
 
 export function createPagination(params: PaginationParams) {
   const {
-    sortField,
-    sortDirection,
     first,
     after,
     last,
     before,
-    cursorField,
-    table,
   } = params;
 
   const paginationSliceParams = getInternalSliceParams({ first, after, last, before } as PaginationSliceParams);
 
-  const orderBy: OrderBy = [sortField, sortDirection];
-  const comparator = getComparator(paginationSliceParams.direction, sortDirection);
+  const comparator = getComparator(params.sortDirection, paginationSliceParams.direction);
+  const sortDirection = getSortDirection(params.sortDirection, paginationSliceParams.direction);
 
+  const orderBy: OrderBy = [params.sortField, sortDirection];
   const returnableLimit = paginationSliceParams.limit;
   const queryableLimit = paginationSliceParams.limit + 1;
 
@@ -74,13 +71,14 @@ export function createPagination(params: PaginationParams) {
     }
 
     return [
-      sortField,
+      params.sortField,
       comparator,
-      subquery => subquery.from(table).select(sortField).where(cursorField, '=', paginationSliceParams.cursor)
+      subquery => subquery
+        .from(params.table)
+        .select(params.sortField)
+        .where(params.cursorField, '=', paginationSliceParams.cursor)
     ];
   })();
-
-  console.log(where);
 
   const predicate: Predicate = {
     orderBy,
@@ -110,26 +108,42 @@ function getInternalSliceParams(sliceParams: PaginationSliceParams): InternalSli
   };
 }
 
-type Comparator = '<=' | '>=' | '<' | '>';
+function getSortDirection(specifiedSortDirection: SortDirection, paginationDirection: PaginationDirection) {
+  if (paginationDirection === 'forward') {
+    return specifiedSortDirection;
+  }
 
-function getComparator(paginationDirection: PaginationDirection, sortDirection: SortDirection): Comparator {
-  if (sortDirection === 'desc') {
+  if (specifiedSortDirection === 'desc') {
+    return 'asc';
+  }
+
+  if (specifiedSortDirection === 'asc') {
+    return 'desc';
+  }
+
+  throw new Error('unknown state for getSortDirection');
+}
+
+type Comparator = '<' | '>';
+
+function getComparator(specifiedSortDirection: SortDirection, paginationDirection: PaginationDirection): Comparator {
+  if (specifiedSortDirection === 'desc') {
     if (paginationDirection === 'forward') {
       return '<';
     }
     if (paginationDirection === 'backward') {
-      return '>=';
+      return '>';
     }
   }
 
-  if (sortDirection === 'asc') {
+  if (specifiedSortDirection === 'asc') {
     if (paginationDirection === 'forward') {
-      return '>='
+      return '>'
     }
     if (paginationDirection === 'backward') {
-      return '<=';
+      return '<';
     }
   }
 
-  throw new Error('unknown comparator state');
+  throw new Error('unknown state for getComparator');
 }

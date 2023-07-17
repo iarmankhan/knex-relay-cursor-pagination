@@ -25,7 +25,7 @@ export async function example(db: Knex) {
     .limit(pagination.limit)
     .select('*')
 
-  console.log(records);
+  console.log(records.reverse());
 }
 
 
