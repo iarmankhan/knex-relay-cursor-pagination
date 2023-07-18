@@ -6,7 +6,7 @@ const db: Knex = knex({});
 
 (async () => {
 
-  const pagination = createPagination();
+  // const pagination = createPagination();
 
   db.from('items')
     .where('creation_timestamp', '<=', '2023-05-03')

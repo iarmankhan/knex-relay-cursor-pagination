@@ -1,15 +1,22 @@
 import { Knex } from 'knex';
 
 type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
-export type XOR<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
+type XOR<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
 
 export type PaginationParams =
   PaginationSliceParams & {
-  cursorField: string;
+  cursorField: CursorField;
   sortField: string;
   sortDirection: SortDirection;
   table: string;
 };
+
+type CursorField = XOR<string, AliasedField>;
+
+interface AliasedField {
+  alias: string;
+  column: string;
+}
 
 type PaginationSliceParams = XOR<
   ForwardPaginationSliceParams,
@@ -87,10 +94,11 @@ export function createPagination(params: PaginationParams) {
       } as unknown as Where;
     }
 
+    const cursorColumn = getCursorColumn(params.cursorField);
     const subquery = (subquery: Knex.QueryBuilder): Knex.QueryBuilder => subquery
       .from(params.table)
       .select(params.sortField)
-      .where(params.cursorField, '=', paginationSliceParams.cursor as Knex.Value);
+      .where(cursorColumn, '=', paginationSliceParams.cursor as Knex.Value);
 
     return {
       column: params.sortField,
@@ -135,6 +143,14 @@ export function createPagination(params: PaginationParams) {
     ...predicate,
     getRows,
   }
+}
+
+function getCursorColumn(cursorField: CursorField): string {
+  if (typeof cursorField === 'string') {
+    return cursorField;
+  }
+  const aliasedField = cursorField as AliasedField;
+  return aliasedField.column;
 }
 
 function getInternalSliceParams(sliceParams: PaginationSliceParams): InternalSliceParams {
