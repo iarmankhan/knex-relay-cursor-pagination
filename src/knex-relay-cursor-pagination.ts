@@ -5,10 +5,10 @@ type XOR<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> &
 
 export type PaginationParams =
   PaginationSliceParams & {
+  from: string;
   cursorField: CursorField;
   sortField: string;
   sortDirection: SortDirection;
-  table: string;
 };
 
 type CursorField = XOR<string, AliasedField>;
@@ -21,7 +21,7 @@ interface AliasedField {
 type PaginationSliceParams = XOR<
   ForwardPaginationSliceParams,
   BackwardPaginationSliceParams
-  >;
+>;
 
 interface ForwardPaginationSliceParams {
   first: number;
@@ -95,8 +95,8 @@ export function createPagination(params: PaginationParams) {
     }
 
     const cursorColumn = getCursorColumn(params.cursorField);
-    const subquery = (subquery: Knex.QueryBuilder): Knex.QueryBuilder => subquery
-      .from(params.table)
+    const subquery = (q: Knex.QueryBuilder): any => q
+      .from(params.from)
       .select(params.sortField)
       .where(cursorColumn, '=', paginationSliceParams.cursor as Knex.Value);
 
