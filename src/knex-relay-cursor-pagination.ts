@@ -56,11 +56,17 @@ export type OrderBy = {
 
 export type SortDirection = 'asc' | 'desc';
 
-export type Where = {
+export interface Where {
   column: string;
   comparator: Comparator;
   value: (b: Knex.QueryBuilder) => Knex.QueryBuilder;
-};
+}
+
+export interface NoopWhere {
+  column: (q: Knex.QueryBuilder) => Knex.QueryBuilder,
+  comparator: '>',
+  value: 0
+}
 
 export function createPagination(params: PaginationParams) {
   const {
