@@ -6,12 +6,12 @@ type XOR<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> &
 export type PaginationParams =
   PaginationSliceParams & {
   from: string;
-  cursorField: CursorField;
-  sortField: string;
+  cursorField: Field;
+  sortField: Field;
   sortDirection: SortDirection;
 };
 
-type CursorField = XOR<string, AliasedField>;
+type Field = XOR<string, AliasedField>;
 
 interface AliasedField {
   alias: string;
@@ -80,9 +80,10 @@ export function createPagination(params: PaginationParams) {
 
   const comparator = getComparator(params.sortDirection, paginationSliceParams.direction);
   const sortDirection = getSortDirection(params.sortDirection, paginationSliceParams.direction);
+  const sortColumn = getColumn(params.sortField);
 
   const orderBy: OrderBy = {
-    column: params.sortField,
+    column: sortColumn,
     direction: sortDirection,
   };
   const returnableLimit = paginationSliceParams.limit;
@@ -100,14 +101,14 @@ export function createPagination(params: PaginationParams) {
       } as unknown as Where;
     }
 
-    const cursorColumn = getCursorColumn(params.cursorField);
+    const cursorColumn = getColumn(params.cursorField);
     const subquery = (q: Knex.QueryBuilder): any => q
       .from(params.from)
-      .select(params.sortField)
+      .select(sortColumn)
       .where(cursorColumn, '=', paginationSliceParams.cursor as Knex.Value);
 
     return {
-      column: params.sortField,
+      column: sortColumn,
       comparator: comparator,
       value: subquery,
     };
@@ -151,7 +152,7 @@ export function createPagination(params: PaginationParams) {
   }
 }
 
-function getCursorColumn(cursorField: CursorField): string {
+function getColumn(cursorField: Field): string {
   if (typeof cursorField === 'string') {
     return cursorField;
   }

@@ -53,6 +53,7 @@
     "dts-cli": "^2.0.3",
     "husky": "^8.0.3",
     "knex": "^2.5.1",
+    "knex-name-util": "^0.2.0",
     "pg": "^8.11.1",
     "size-limit": "^8.2.6",
     "testcontainers": "^8.11.1",

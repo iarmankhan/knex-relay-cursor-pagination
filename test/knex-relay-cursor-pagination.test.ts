@@ -16,7 +16,7 @@ describe('knex-relay-cursor-pagination', () => {
       client: 'pg',
       connection,
       migrations: {
-        directory: `${__dirname}/migrations`
+        directory: `${__dirname}/migrations/swapi`
       }
     });
     await db.migrate.up();
@@ -30,7 +30,7 @@ describe('knex-relay-cursor-pagination', () => {
   test('createPagination', async () => {
     const pagination = createPagination({
       from: 'people',
-      sortField: 'created',
+      sortField: 'created_at',
       sortDirection: 'desc',
       cursorField: 'id',
       first: 2,
@@ -54,7 +54,7 @@ describe('knex-relay-cursor-pagination', () => {
 
     const pagination = createPagination({
       from: 'cte',
-      sortField: 'created',
+      sortField: 'created_at',
       sortDirection: 'desc',
       cursorField: 'id',
       first: 2,
