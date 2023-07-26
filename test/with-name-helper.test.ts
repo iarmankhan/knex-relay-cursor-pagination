@@ -20,7 +20,7 @@ describe('with name util', () => {
       client: 'pg',
       connection,
       migrations: {
-        directory: `${__dirname}/migrations`
+        directory: `${__dirname}/migrations/swapi`
       }
     });
     await db.migrate.up();
@@ -34,12 +34,12 @@ describe('with name util', () => {
   test('', async () => {
     const pagination = createPagination({
       from: peopleTable.name,
-      sortField: {
+      sortColumn: {
         column: peopleTable.column('createdAt'),
         alias: peopleTable.prefixedAlias('createdAt'),
       },
       sortDirection: 'desc',
-      cursorField: {
+      cursorColumn: {
         column: peopleTable.column('id'),
         alias: peopleTable.prefixedAlias('id'),
       },

@@ -30,9 +30,9 @@ describe('knex-relay-cursor-pagination', () => {
   test('createPagination', async () => {
     const pagination = createPagination({
       from: 'people',
-      sortField: 'created_at',
+      sortColumn: 'created_at',
       sortDirection: 'desc',
-      cursorField: 'id',
+      cursorColumn: 'id',
       first: 2,
       after: '00000000-0000-0000-0000-000000000003'
     });
@@ -54,9 +54,9 @@ describe('knex-relay-cursor-pagination', () => {
 
     const pagination = createPagination({
       from: 'cte',
-      sortField: 'created_at',
+      sortColumn: 'created_at',
       sortDirection: 'desc',
-      cursorField: 'id',
+      cursorColumn: 'id',
       first: 2,
       after: '00000000-0000-0000-0000-000000000003'
     });

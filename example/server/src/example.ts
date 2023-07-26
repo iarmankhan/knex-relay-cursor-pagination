@@ -14,9 +14,9 @@ export async function example(db: Knex) {
 
   const pagination = createPagination({
     table,
-    sortField: 'created',
+    sortColumn: 'created',
     sortDirection: 'desc',
-    cursorField: 'id',
+    cursorColumn: 'id',
     // first: 2,
     // after: id,
     last: 2,
