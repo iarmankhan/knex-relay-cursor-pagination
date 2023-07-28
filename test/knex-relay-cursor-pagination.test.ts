@@ -34,7 +34,13 @@ describe('knex-relay-cursor-pagination', () => {
       sortDirection: 'desc',
       cursorColumn: 'id',
       first: 2,
-      after: '00000000-0000-0000-0000-000000000003'
+      // after: '00000000-0000-0000-0000-000000000003',
+      // deobfuscateCursor: (s) => s,
+      // obfuscateCursor: (s) => s,
+
+      after: 'MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx',
+      deobfuscateCursor: atob,
+      obfuscateCursor: btoa,
     });
 
     const query = db.from('people')
@@ -44,33 +50,36 @@ describe('knex-relay-cursor-pagination', () => {
       .select('*');
 
     const rows = await query;
-    console.log(rows);
+
+    const page = pagination.getPage(rows);
+    console.log(JSON.stringify(page, null, 2));
   });
 
-  test('cte', async () => {
-    const cte = db.from('people')
-      .whereLike('name', '%e%')
-      .select('*');
-
-    const pagination = createPagination({
-      from: 'cte',
-      sortColumn: 'created_at',
-      sortDirection: 'desc',
-      cursorColumn: 'id',
-      first: 2,
-      after: '00000000-0000-0000-0000-000000000003'
-    });
-
-    const query = db
-      .with('cte', cte)
-      .from('cte')
-      .where(pagination.where.column, pagination.where.comparator, pagination.where.value)
-      .orderBy(pagination.orderBy.column, pagination.orderBy.direction)
-      .limit(pagination.limit)
-      .select('*');
-
-    const rows = await query;
-    console.log(rows);
-  });
+  // test('cte', async () => {
+  //   const cte = db.from('people')
+  //     .whereLike('name', '%e%')
+  //     .select('*');
+  //
+  //   const pagination = createPagination({
+  //     from: 'cte',
+  //     sortColumn: 'created_at',
+  //     sortDirection: 'desc',
+  //     cursorColumn: 'id',
+  //     first: 2,
+  //     after: '00000000-0000-0000-0000-000000000003',
+  //     getCursor: (i: { id: string }) => btoa(i.id),
+  //   });
+  //
+  //   const query = db
+  //     .with('cte', cte)
+  //     .from('cte')
+  //     .where(pagination.where.column, pagination.where.comparator, pagination.where.value)
+  //     .orderBy(pagination.orderBy.column, pagination.orderBy.direction)
+  //     .limit(pagination.limit)
+  //     .select('*');
+  //
+  //   const rows = await query;
+  //   console.log(rows);
+  // });
 });
 

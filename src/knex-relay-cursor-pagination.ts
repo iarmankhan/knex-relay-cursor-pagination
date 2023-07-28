@@ -9,6 +9,9 @@ export type PaginationParams =
   cursorColumn: Column;
   sortColumn: Column;
   sortDirection: SortDirection;
+  obfuscateCursor: (cursor: string) => string;
+  deobfuscateCursor: (obfuscatedCursor: string) => string;
+  onCursorMissing?: 'throw' | 'omit';
 };
 
 type Column = XOR<string, AliasedColumn>;
@@ -68,6 +71,18 @@ export interface NoopWhere {
   value: 0
 }
 
+export interface Edge<T = unknown, U = string> {
+  cursor: U;
+  node: T;
+}
+
+export interface PageInfo {
+  endCursor?: string;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  startCursor?: string;
+}
+
 export function createPagination(params: PaginationParams) {
   const {
     first,
@@ -81,6 +96,7 @@ export function createPagination(params: PaginationParams) {
   const comparator = getComparator(params.sortDirection, paginationSliceParams.direction);
   const sortDirection = getSortDirection(params.sortDirection, paginationSliceParams.direction);
   const sortColumn = getColumn(params.sortColumn);
+  const cursorColumn = getColumn(params.cursorColumn);
 
   const orderBy: OrderBy = {
     column: sortColumn,
@@ -101,11 +117,12 @@ export function createPagination(params: PaginationParams) {
       } as unknown as Where;
     }
 
-    const cursorColumn = getColumn(params.cursorColumn);
+    const cursor = params.deobfuscateCursor(paginationSliceParams.cursor as string);
+
     const subquery = (q: Knex.QueryBuilder): any => q
       .from(params.from)
       .select(sortColumn)
-      .where(cursorColumn, '=', paginationSliceParams.cursor as Knex.Value);
+      .where(cursorColumn, '=', cursor as Knex.Value);
 
     return {
       column: sortColumn,
@@ -120,35 +137,72 @@ export function createPagination(params: PaginationParams) {
     where
   };
 
-  const getRows = (rows: unknown[]) => {
+  const processItems = (rows: unknown[]): [unknown[], unknown|undefined] => {
     if (rows.length === 0) {
-      return [];
+      return [[], undefined];
     }
 
     if (rows.length <= returnableLimit) {
-      return rows;
+      return [rows, undefined];
     }
 
     if (rows.length === queryableLimit) {
-      const returnableItems = [...rows];
+      const itemsOfPage = [...rows];
 
       if (paginationSliceParams.direction === 'forward'){
-        returnableItems.pop();
-        return returnableItems;
+        const prevItem = itemsOfPage.pop();
+        return [itemsOfPage, prevItem];
       }
 
       if (paginationSliceParams.direction === 'backward') {
-        returnableItems.shift();
-        return returnableItems;
+        const nextItem = itemsOfPage.shift();
+        return [itemsOfPage, nextItem];
       }
     }
 
     throw new Error('invalid state for getRows');
   };
 
+  function getPage<T = unknown>(rows: T[]) {
+    const { obfuscateCursor, onCursorMissing = 'omit' } = params;
+
+    const [items, adjacentItem] = processItems(rows);
+
+    const edges = [];
+    for (const item of items) {
+      const cursor = (item as any)[cursorColumn];
+      if (cursor === undefined || cursor === null) {
+        if (onCursorMissing === 'throw') {
+          throw new Error('cursor is missing');
+        } else {
+          continue;
+        }
+      }
+
+      const edge = {
+        cursor: obfuscateCursor(cursor as string),
+        node: item,
+      };
+
+      edges.push(edge);
+    }
+
+    const pageInfo: PageInfo = {
+      hasNextPage: sortDirection === 'desc' ? true : !!adjacentItem,
+      hasPreviousPage: sortDirection === 'asc' ? true : !!adjacentItem,
+      startCursor: edges.length ? edges[0].cursor : undefined,
+      endCursor: edges.length ? edges[edges.length - 1].cursor : undefined,
+    };
+
+    return {
+      edges,
+      pageInfo,
+    };
+  }
+
   return {
     ...predicate,
-    getRows,
+    getPage
   }
 }
 
