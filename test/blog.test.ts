@@ -1,11 +1,10 @@
 import knex, { Knex } from 'knex';
 import 'pg';
 
-import { createPagination, PaginationDatasetParams, ForwardPaginationSliceParams, Page } from '../src';
+import { createPagination, PaginationDatasetParams, ForwardPaginationSliceParams, BackwardPaginationSliceParams, Page } from '../src';
 
 import { posts } from './data';
 import { createPgTestcontainer, StartedPgTestContainer } from './setup';
-import { BackwardPaginationSliceParams } from '../dist';
 
 describe('createPagination', () => {
   let db: Knex;
