@@ -28,7 +28,7 @@ interface AliasedColumn {
   alias: string;
 }
 
-type PaginationSliceParams = XOR<
+export type PaginationSliceParams = XOR<
   ForwardPaginationSliceParams,
   BackwardPaginationSliceParams
 >;
@@ -38,7 +38,7 @@ export interface ForwardPaginationSliceParams {
   after?: Cursor;
 }
 
-interface BackwardPaginationSliceParams {
+export interface BackwardPaginationSliceParams {
   last: number;
   before?: Cursor;
 }
@@ -201,8 +201,8 @@ export function createPagination(params: PaginationParams) {
     }
 
     const pageInfo: PageInfo = {
-      hasNextPage: sortDirection === 'desc' ? true : !!adjacentItem,
-      hasPreviousPage: sortDirection === 'asc' ? true : !!adjacentItem,
+      hasNextPage: paginationSliceParams.direction === 'backward' ? !!before : !!adjacentItem,
+      hasPreviousPage: paginationSliceParams.direction === 'forward' ? !!after : !!adjacentItem,
       startCursor: edges.length ? edges[0].cursor : undefined,
       endCursor: edges.length ? edges[edges.length - 1].cursor : undefined,
     };
@@ -215,7 +215,7 @@ export function createPagination(params: PaginationParams) {
 
   return {
     ...predicate,
-    getPage
+    getPage,
   }
 }
 

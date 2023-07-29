@@ -46,44 +46,163 @@ describe('createPagination', () => {
 
       const cases: Array<[string, ForwardPagingTestCase]> = [
         [
-          '0...end at limit',
+          '0...end, row-count at limit',
           {
             sliceParams: { first: posts.length },
             expected: {
               edges: sortedPosts.map(post => ({
                 node: post,
-                cursor: expect.any(String)
+                cursor: btoa(post.id)
               })) as any,
               pageInfo: {
-                startCursor: undefined,
-                endCursor: expect.any(String),
+                startCursor: btoa(sortedPosts[0].id),
+                endCursor: btoa(sortedPosts.at(-1)!.id),
                 hasPreviousPage: false,
                 hasNextPage: false
               }
             },
           },
         ],
-        // [
-        //   '0...end at under limit',
-        //   {
-        //     sliceParams: { first: posts.length + 1 },
-        //     expected: sortedPosts,
-        //   }
-        // ]
-
-        /*
-        0...end
-          at limit
-          under limit
-        0...m
-        n...m
-        n...end
-          at limit
-          under limit
-
-         */
+        [
+          '0...end, row-count under limit',
+          {
+            sliceParams: { first: posts.length + 1 },
+            expected: {
+              edges: sortedPosts.map(post => ({
+                node: post,
+                cursor: btoa(post.id)
+              })) as any,
+              pageInfo: {
+                startCursor: btoa(sortedPosts[0].id),
+                endCursor: btoa(sortedPosts.at(-1)!.id),
+                hasPreviousPage: false,
+                hasNextPage: false
+              }
+            },
+          }
+        ],
+        [
+          '0...m',
+          {
+            sliceParams: { first: 3 },
+            expected: {
+              edges: [
+                {
+                  node: sortedPosts[0],
+                  cursor: btoa(sortedPosts[0].id)
+                },
+                {
+                  node: sortedPosts[1],
+                  cursor: btoa(sortedPosts[1].id)
+                },
+                {
+                  node: sortedPosts[2],
+                  cursor: btoa(sortedPosts[2].id)
+                }
+              ],
+              pageInfo: {
+                startCursor: btoa(sortedPosts[0].id),
+                endCursor: btoa(sortedPosts.at(2)!.id),
+                hasPreviousPage: false,
+                hasNextPage: true
+              }
+            },
+          }
+        ],
+        [
+          'n...m',
+          {
+            sliceParams: {
+              first: 3,
+              after: btoa(sortedPosts[2].id)
+            },
+            expected: {
+              edges: [
+                {
+                  node: sortedPosts[3],
+                  cursor: btoa(sortedPosts[3].id)
+                },
+                {
+                  node: sortedPosts[4],
+                  cursor: btoa(sortedPosts[4].id)
+                },
+                {
+                  node: sortedPosts[5],
+                  cursor: btoa(sortedPosts[5].id)
+                }
+              ],
+              pageInfo: {
+                startCursor: btoa(sortedPosts[3].id),
+                endCursor: btoa(sortedPosts.at(5)!.id),
+                hasPreviousPage: true,
+                hasNextPage: true
+              }
+            },
+          }
+        ],
+        [
+          'n...end, row-count at limit',
+          {
+            sliceParams: {
+              first: 3,
+              after: btoa(sortedPosts.at(-4)!.id)
+            },
+            expected: {
+              edges: [
+                {
+                  node: sortedPosts.at(-3),
+                  cursor: btoa(sortedPosts.at(-3)!.id)
+                },
+                {
+                  node: sortedPosts.at(-2),
+                  cursor: btoa(sortedPosts.at(-2)!.id)
+                },
+                {
+                  node: sortedPosts.at(-1),
+                  cursor: btoa(sortedPosts.at(-1)!.id)
+                }
+              ],
+              pageInfo: {
+                startCursor: btoa(sortedPosts.at(-3)!.id),
+                endCursor: btoa(sortedPosts.at(-1)!.id),
+                hasPreviousPage: true,
+                hasNextPage: false
+              }
+            },
+          }
+        ],
+        [
+          'n...end, row-count under limit',
+          {
+            sliceParams: {
+              first: 4,
+              after: btoa(sortedPosts.at(-4)!.id)
+            },
+            expected: {
+              edges: [
+                {
+                  node: sortedPosts.at(-3),
+                  cursor: btoa(sortedPosts.at(-3)!.id)
+                },
+                {
+                  node: sortedPosts.at(-2),
+                  cursor: btoa(sortedPosts.at(-2)!.id)
+                },
+                {
+                  node: sortedPosts.at(-1),
+                  cursor: btoa(sortedPosts.at(-1)!.id)
+                }
+              ],
+              pageInfo: {
+                startCursor: btoa(sortedPosts.at(-3)!.id),
+                endCursor: btoa(sortedPosts.at(-1)!.id),
+                hasPreviousPage: true,
+                hasNextPage: false
+              }
+            },
+          }
+        ]
       ];
-
 
       test.each(cases)('%s', async (_, testCase: ForwardPagingTestCase) => {
         const pagination = createPagination({
