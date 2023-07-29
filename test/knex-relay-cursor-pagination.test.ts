@@ -29,18 +29,24 @@ describe('knex-relay-cursor-pagination', () => {
 
   test('createPagination', async () => {
     const pagination = createPagination({
-      from: 'people',
+      after: 'MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx',
+      // before
+
+      // last
+      first: 2,
       sortColumn: 'created_at',
       sortDirection: 'desc',
+
+      from: 'people',
       cursorColumn: 'id',
-      first: 2,
+
+      deobfuscateCursor: atob,
+      obfuscateCursor: btoa,
+      // onCursorMissing
+
       // after: '00000000-0000-0000-0000-000000000003',
       // deobfuscateCursor: (s) => s,
       // obfuscateCursor: (s) => s,
-
-      after: 'MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx',
-      deobfuscateCursor: atob,
-      obfuscateCursor: btoa,
     });
 
     const query = db.from('people')

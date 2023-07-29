@@ -4,15 +4,22 @@ type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 type XOR<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
 
 export type PaginationParams =
-  PaginationSliceParams & {
+  PaginationSliceParams &
+  PaginationDatasetParams &
+  PaginationCursorParams;
+
+export interface PaginationDatasetParams {
   from: string;
   cursorColumn: Column;
   sortColumn: Column;
   sortDirection: SortDirection;
-  obfuscateCursor: (cursor: string) => string;
-  deobfuscateCursor: (obfuscatedCursor: string) => string;
+}
+
+export interface PaginationCursorParams {
+  obfuscateCursor?: (cursor: string) => string;
+  deobfuscateCursor?: (obfuscatedCursor: string) => string;
   onCursorMissing?: 'throw' | 'omit';
-};
+}
 
 type Column = XOR<string, AliasedColumn>;
 
@@ -26,7 +33,7 @@ type PaginationSliceParams = XOR<
   BackwardPaginationSliceParams
 >;
 
-interface ForwardPaginationSliceParams {
+export interface ForwardPaginationSliceParams {
   first: number;
   after?: Cursor;
 }
@@ -83,6 +90,11 @@ export interface PageInfo {
   startCursor?: string;
 }
 
+export interface Page<T = unknown> {
+  edges: Edge<T>[];
+  pageInfo: PageInfo;
+}
+
 export function createPagination(params: PaginationParams) {
   const {
     first,
@@ -117,7 +129,8 @@ export function createPagination(params: PaginationParams) {
       } as unknown as Where;
     }
 
-    const cursor = params.deobfuscateCursor(paginationSliceParams.cursor as string);
+    const { deobfuscateCursor = atob } = params;
+    const cursor = deobfuscateCursor(paginationSliceParams.cursor as string);
 
     const subquery = (q: Knex.QueryBuilder): any => q
       .from(params.from)
@@ -164,7 +177,7 @@ export function createPagination(params: PaginationParams) {
   };
 
   function getPage<T = unknown>(rows: T[]) {
-    const { obfuscateCursor, onCursorMissing = 'omit' } = params;
+    const { obfuscateCursor = btoa, onCursorMissing = 'omit' } = params;
 
     const [items, adjacentItem] = processItems(rows);
 
