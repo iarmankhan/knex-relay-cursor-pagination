@@ -6,12 +6,11 @@ export interface Post {
 
 export const posts: Post[] = [
   {
-    id: 'ae52f86a-a5d3-4f3a-8558-815b946ac947',
-    creation_timestamp: new Date('2023-07-06'),
+    id: '00000000-0000-0000-0000-000000000000',
+    creation_timestamp: new Date('2020-07-06'),
     title: 'Post 0',
   },
   {
-    // e276120a-3060-410f-a976-fc2eba7ada47
     id: '00000000-0000-0000-0000-000000000001',
     creation_timestamp: new Date('2023-07-07'),
     title: 'Post 1',

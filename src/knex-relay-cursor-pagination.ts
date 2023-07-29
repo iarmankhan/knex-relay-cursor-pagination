@@ -161,16 +161,8 @@ export function createPagination(params: PaginationParams) {
 
     if (rows.length === queryableLimit) {
       const itemsOfPage = [...rows];
-
-      if (paginationSliceParams.direction === 'forward'){
-        const prevItem = itemsOfPage.pop();
-        return [itemsOfPage, prevItem];
-      }
-
-      if (paginationSliceParams.direction === 'backward') {
-        const nextItem = itemsOfPage.shift();
-        return [itemsOfPage, nextItem];
-      }
+      const prevItem = itemsOfPage.pop();
+      return [itemsOfPage, prevItem];
     }
 
     throw new Error('invalid state for getRows');

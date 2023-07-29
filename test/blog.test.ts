@@ -5,6 +5,7 @@ import { createPagination, PaginationDatasetParams, ForwardPaginationSliceParams
 
 import { posts } from './data';
 import { createPgTestcontainer, StartedPgTestContainer } from './setup';
+import { BackwardPaginationSliceParams } from '../dist';
 
 describe('createPagination', () => {
   let db: Knex;
@@ -36,8 +37,9 @@ describe('createPagination', () => {
       cursorColumn: 'id'
     };
 
+    const sortedPosts = posts.sort((a, b) => b.creation_timestamp.getTime() - a.creation_timestamp.getTime());
+
     describe('forward paging', () => {
-      const sortedPosts = posts.sort((a, b) => b.creation_timestamp.getTime() - a.creation_timestamp.getTime());
 
       interface ForwardPagingTestCase {
         sliceParams: ForwardPaginationSliceParams;
@@ -46,7 +48,7 @@ describe('createPagination', () => {
 
       const cases: Array<[string, ForwardPagingTestCase]> = [
         [
-          '0...end, row-count at limit',
+          'first...last, row-count at limit',
           {
             sliceParams: { first: posts.length },
             expected: {
@@ -64,7 +66,7 @@ describe('createPagination', () => {
           },
         ],
         [
-          '0...end, row-count under limit',
+          'first...last, row-count under limit',
           {
             sliceParams: { first: posts.length + 1 },
             expected: {
@@ -82,7 +84,7 @@ describe('createPagination', () => {
           }
         ],
         [
-          '0...m',
+          'first...n',
           {
             sliceParams: { first: 3 },
             expected: {
@@ -110,7 +112,7 @@ describe('createPagination', () => {
           }
         ],
         [
-          'n...m',
+          'm...n',
           {
             sliceParams: {
               first: 3,
@@ -141,7 +143,7 @@ describe('createPagination', () => {
           }
         ],
         [
-          'n...end, row-count at limit',
+          'm...last, row-count at limit',
           {
             sliceParams: {
               first: 3,
@@ -172,7 +174,7 @@ describe('createPagination', () => {
           }
         ],
         [
-          'n...end, row-count under limit',
+          'm...last, row-count under limit',
           {
             sliceParams: {
               first: 4,
@@ -219,24 +221,192 @@ describe('createPagination', () => {
         expect(pagination.getPage(rows)).toEqual(testCase.expected);
       });
     });
-  });
 
+    describe('backward paging', () => {
+      interface BackwardPagingTestCase {
+        sliceParams: BackwardPaginationSliceParams;
+        expected: Page;
+      }
+
+      const cases: Array<[string, BackwardPagingTestCase]> = [
+        [
+          'last...first, row-count at limit',
+          {
+            sliceParams: { last: posts.length },
+            expected: {
+              edges: [...sortedPosts].reverse().map(post => ({
+                node: post,
+                cursor: btoa(post.id)
+              })) as any,
+              pageInfo: {
+                startCursor: btoa(sortedPosts.at(-1)!.id),
+                endCursor: btoa(sortedPosts[0].id),
+                hasPreviousPage: false,
+                hasNextPage: false
+              }
+            },
+          }
+        ],
+        [
+          'last...first, row-count under limit',
+          {
+            sliceParams: { last: posts.length + 1 },
+            expected: {
+              edges: [...sortedPosts].reverse().map(post => ({
+                node: post,
+                cursor: btoa(post.id)
+              })) as any,
+              pageInfo: {
+                startCursor: btoa(sortedPosts.at(-1)!.id),
+                endCursor: btoa(sortedPosts[0]!.id),
+                hasPreviousPage: false,
+                hasNextPage: false
+              }
+            },
+          }
+        ],
+        [
+          'last...m',
+          {
+            sliceParams: { last: 3 },
+            expected: {
+              edges: [
+                {
+                  node: sortedPosts.at(-1),
+                  cursor: btoa(sortedPosts.at(-1)!.id)
+                },
+                {
+                  node: sortedPosts.at(-2),
+                  cursor: btoa(sortedPosts.at(-2)!.id)
+                },
+                {
+                  node: sortedPosts.at(-3),
+                  cursor: btoa(sortedPosts.at(-3)!.id)
+                }
+              ],
+              pageInfo: {
+                startCursor: btoa(sortedPosts.at(-1)!.id),
+                endCursor: btoa(sortedPosts.at(-3)!.id),
+                hasPreviousPage: true,
+                hasNextPage: false,
+              }
+            },
+          }
+        ],
+        [
+          'n...m',
+          {
+            sliceParams: {
+              last: 3,
+              before: btoa(sortedPosts.at(-3)!.id)
+            },
+            expected: {
+              edges: [
+                {
+                  node: sortedPosts.at(-4),
+                  cursor: btoa(sortedPosts.at(-4)!.id)
+                },
+                {
+                  node: sortedPosts.at(-5),
+                  cursor: btoa(sortedPosts.at(-5)!.id)
+                },
+                {
+                  node: sortedPosts.at(-6),
+                  cursor: btoa(sortedPosts.at(-6)!.id)
+                }
+              ],
+              pageInfo: {
+                startCursor: btoa(sortedPosts.at(-4)!.id),
+                endCursor: btoa(sortedPosts.at(-6)!.id),
+                hasPreviousPage: true,
+                hasNextPage: true
+              }
+            },
+          }
+        ],
+        [
+          'm...first, row-count at limit',
+          {
+            sliceParams: {
+              last: 3,
+              before: btoa(sortedPosts[3].id)
+            },
+            expected: {
+              edges: [
+                {
+                  node: sortedPosts[2],
+                  cursor: btoa(sortedPosts[2].id)
+                },
+                {
+                  node: sortedPosts[1],
+                  cursor: btoa(sortedPosts[1].id)
+                },
+                {
+                  node: sortedPosts[0],
+                  cursor: btoa(sortedPosts[0].id)
+                },
+              ],
+              pageInfo: {
+                startCursor: btoa(sortedPosts[2].id),
+                endCursor: btoa(sortedPosts[0].id),
+                hasPreviousPage: false,
+                hasNextPage: true
+              }
+            },
+          }
+        ],
+        [
+          'm...first, row-count under limit',
+          {
+            sliceParams: {
+              last: 4,
+              before: btoa(sortedPosts[3].id)
+            },
+            expected: {
+              edges: [
+                {
+                  node: sortedPosts[2],
+                  cursor: btoa(sortedPosts[2].id)
+                },
+                {
+                  node: sortedPosts[1],
+                  cursor: btoa(sortedPosts[1].id)
+                },
+                {
+                  node: sortedPosts[0],
+                  cursor: btoa(sortedPosts[0].id)
+                },
+              ],
+              pageInfo: {
+                startCursor: btoa(sortedPosts[2].id),
+                endCursor: btoa(sortedPosts[0].id),
+                hasPreviousPage: false,
+                hasNextPage: true
+              }
+            },
+          }
+        ]
+      ];
+
+      test.each(cases)('%s', async (_, testCase: BackwardPagingTestCase) => {
+        const pagination = createPagination({
+          ...baseParams,
+          ...testCase.sliceParams,
+        });
+
+        const rows = await db.from('posts')
+          .where(pagination.where.column, pagination.where.comparator, pagination.where.value)
+          .orderBy(pagination.orderBy.column, pagination.orderBy.direction)
+          .limit(pagination.limit)
+          .select('*');
+
+        expect(pagination.getPage(rows)).toEqual(testCase.expected);
+      });
+    });
+  });
 });
 
 /*
-
-0...end
-  at limit
-  under limit
-0...m
-n...m
-n...end
-  at limit
-  under limit
-
-forward
-backward
-
 with common-table-expression
 
 obfuscateCursor custom
