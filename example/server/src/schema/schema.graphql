@@ -1,0 +1,9 @@
+type Query {
+  person(id: String!): Person
+}
+
+type Person {
+  id: String!
+  name: String!
+  created: String!
+}
