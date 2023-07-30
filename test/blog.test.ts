@@ -404,13 +404,6 @@ describe('createPagination', () => {
   });
 
   describe('query from a common-table-expression', () => {
-    const baseParams: PaginationDatasetParams = {
-      from: 'cte',
-      sortColumn: 'comments_count',
-      sortDirection: 'desc',
-      cursorColumn: 'id',
-    };
-
     const cases: Array<[string, ForwardPagingTestCase]> = [
       [
         'first...last',
@@ -418,14 +411,14 @@ describe('createPagination', () => {
           sliceParams: { first: 20 },
           expected: {
             edges: [
-              { node: posts[4], cursor: btoa(posts[4].id) },
-              { node: posts[0], cursor: btoa(posts[0].id) },
-              { node: posts[3], cursor: btoa(posts[3].id) },
-              { node: posts[2], cursor: btoa(posts[2].id) },
-              { node: posts[6], cursor: btoa(posts[6].id) },
-              { node: posts[7], cursor: btoa(posts[7].id) },
-              { node: posts[5], cursor: btoa(posts[5].id) },
-              { node: posts[1], cursor: btoa(posts[1].id) },
+              { node: posts[4], cursor: btoa(posts[4].id) }, // 5 comments
+              { node: posts[0], cursor: btoa(posts[0].id) }, // 4 comments
+              { node: posts[3], cursor: btoa(posts[3].id) }, // 2 comments
+              { node: posts[2], cursor: btoa(posts[2].id) }, // 2 comments
+              { node: posts[6], cursor: btoa(posts[6].id) }, // 1 comment
+              { node: posts[7], cursor: btoa(posts[7].id) }, // 0 comments
+              { node: posts[5], cursor: btoa(posts[5].id) }, // 0 comments
+              { node: posts[1], cursor: btoa(posts[1].id) }, // 0 comments
             ],
             pageInfo: {
               startCursor: btoa(posts[4].id),
@@ -459,6 +452,13 @@ describe('createPagination', () => {
         }
       ]
     ];
+
+    const baseParams: PaginationDatasetParams = {
+      from: 'cte',
+      sortColumn: 'comments_count',
+      sortDirection: 'desc',
+      cursorColumn: 'id',
+    };
 
     test.each(cases)('%s', async (_, testCase) => {
       const cte = db.from('posts')
