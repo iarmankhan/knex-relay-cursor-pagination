@@ -55,13 +55,19 @@ describe('createPagination', () => {
           {
             sliceParams: { first: posts.length },
             expected: {
-              edges: sortedPosts.map(post => ({
-                node: post,
-                cursor: btoa(post.id)
-              })) as any,
+              edges: [
+                { node: posts[7], cursor: btoa(posts[7].id) },
+                { node: posts[6], cursor: btoa(posts[6].id) },
+                { node: posts[5], cursor: btoa(posts[5].id) },
+                { node: posts[4], cursor: btoa(posts[4].id) },
+                { node: posts[3], cursor: btoa(posts[3].id) },
+                { node: posts[2], cursor: btoa(posts[2].id) },
+                { node: posts[1], cursor: btoa(posts[1].id) },
+                { node: posts[0], cursor: btoa(posts[0].id) },
+              ],
               pageInfo: {
-                startCursor: btoa(sortedPosts[0].id),
-                endCursor: btoa(sortedPosts.at(-1)!.id),
+                startCursor: btoa(posts[7].id),
+                endCursor: btoa(posts[0].id),
                 hasPreviousPage: false,
                 hasNextPage: false
               }
@@ -73,13 +79,19 @@ describe('createPagination', () => {
           {
             sliceParams: { first: posts.length + 1 },
             expected: {
-              edges: sortedPosts.map(post => ({
-                node: post,
-                cursor: btoa(post.id)
-              })) as any,
+              edges: [
+                { node: posts[7], cursor: btoa(posts[7].id) },
+                { node: posts[6], cursor: btoa(posts[6].id) },
+                { node: posts[5], cursor: btoa(posts[5].id) },
+                { node: posts[4], cursor: btoa(posts[4].id) },
+                { node: posts[3], cursor: btoa(posts[3].id) },
+                { node: posts[2], cursor: btoa(posts[2].id) },
+                { node: posts[1], cursor: btoa(posts[1].id) },
+                { node: posts[0], cursor: btoa(posts[0].id) },
+              ],
               pageInfo: {
-                startCursor: btoa(sortedPosts[0].id),
-                endCursor: btoa(sortedPosts.at(-1)!.id),
+                startCursor: btoa(posts[7].id),
+                endCursor: btoa(posts[0].id),
                 hasPreviousPage: false,
                 hasNextPage: false
               }
@@ -92,22 +104,13 @@ describe('createPagination', () => {
             sliceParams: { first: 3 },
             expected: {
               edges: [
-                {
-                  node: sortedPosts[0],
-                  cursor: btoa(sortedPosts[0].id)
-                },
-                {
-                  node: sortedPosts[1],
-                  cursor: btoa(sortedPosts[1].id)
-                },
-                {
-                  node: sortedPosts[2],
-                  cursor: btoa(sortedPosts[2].id)
-                }
+                { node: posts[7], cursor: btoa(posts[7].id) },
+                { node: posts[6], cursor: btoa(posts[6].id) },
+                { node: posts[5], cursor: btoa(posts[5].id) },
               ],
               pageInfo: {
-                startCursor: btoa(sortedPosts[0].id),
-                endCursor: btoa(sortedPosts.at(2)!.id),
+                startCursor: btoa(posts[7].id),
+                endCursor: btoa(posts[5].id),
                 hasPreviousPage: false,
                 hasNextPage: true
               }
@@ -123,22 +126,13 @@ describe('createPagination', () => {
             },
             expected: {
               edges: [
-                {
-                  node: sortedPosts[3],
-                  cursor: btoa(sortedPosts[3].id)
-                },
-                {
-                  node: sortedPosts[4],
-                  cursor: btoa(sortedPosts[4].id)
-                },
-                {
-                  node: sortedPosts[5],
-                  cursor: btoa(sortedPosts[5].id)
-                }
+                { node: posts[4], cursor: btoa(posts[4].id) },
+                { node: posts[3], cursor: btoa(posts[3].id) },
+                { node: posts[2], cursor: btoa(posts[2].id) },
               ],
               pageInfo: {
-                startCursor: btoa(sortedPosts[3].id),
-                endCursor: btoa(sortedPosts.at(5)!.id),
+                startCursor: btoa(posts[4].id),
+                endCursor: btoa(posts[2].id),
                 hasPreviousPage: true,
                 hasNextPage: true
               }
@@ -154,22 +148,13 @@ describe('createPagination', () => {
             },
             expected: {
               edges: [
-                {
-                  node: sortedPosts.at(-3),
-                  cursor: btoa(sortedPosts.at(-3)!.id)
-                },
-                {
-                  node: sortedPosts.at(-2),
-                  cursor: btoa(sortedPosts.at(-2)!.id)
-                },
-                {
-                  node: sortedPosts.at(-1),
-                  cursor: btoa(sortedPosts.at(-1)!.id)
-                }
+                { node: posts[2], cursor: btoa(posts[2].id) },
+                { node: posts[1], cursor: btoa(posts[1].id) },
+                { node: posts[0], cursor: btoa(posts[0].id) },
               ],
               pageInfo: {
-                startCursor: btoa(sortedPosts.at(-3)!.id),
-                endCursor: btoa(sortedPosts.at(-1)!.id),
+                startCursor: btoa(posts[2].id),
+                endCursor: btoa(posts[0].id),
                 hasPreviousPage: true,
                 hasNextPage: false
               }
@@ -185,22 +170,13 @@ describe('createPagination', () => {
             },
             expected: {
               edges: [
-                {
-                  node: sortedPosts.at(-3),
-                  cursor: btoa(sortedPosts.at(-3)!.id)
-                },
-                {
-                  node: sortedPosts.at(-2),
-                  cursor: btoa(sortedPosts.at(-2)!.id)
-                },
-                {
-                  node: sortedPosts.at(-1),
-                  cursor: btoa(sortedPosts.at(-1)!.id)
-                }
+                { node: posts[2], cursor: btoa(posts[2].id) },
+                { node: posts[1], cursor: btoa(posts[1].id) },
+                { node: posts[0], cursor: btoa(posts[0].id) },
               ],
               pageInfo: {
-                startCursor: btoa(sortedPosts.at(-3)!.id),
-                endCursor: btoa(sortedPosts.at(-1)!.id),
+                startCursor: btoa(posts[2].id),
+                endCursor: btoa(posts[0].id),
                 hasPreviousPage: true,
                 hasNextPage: false
               }
@@ -232,13 +208,19 @@ describe('createPagination', () => {
           {
             sliceParams: { last: posts.length },
             expected: {
-              edges: [...sortedPosts].reverse().map(post => ({
-                node: post,
-                cursor: btoa(post.id)
-              })) as any,
+              edges: [
+                { node: posts[0], cursor: btoa(posts[0].id) },
+                { node: posts[1], cursor: btoa(posts[1].id) },
+                { node: posts[2], cursor: btoa(posts[2].id) },
+                { node: posts[3], cursor: btoa(posts[3].id) },
+                { node: posts[4], cursor: btoa(posts[4].id) },
+                { node: posts[5], cursor: btoa(posts[5].id) },
+                { node: posts[6], cursor: btoa(posts[6].id) },
+                { node: posts[7], cursor: btoa(posts[7].id) },
+              ],
               pageInfo: {
-                startCursor: btoa(sortedPosts.at(-1)!.id),
-                endCursor: btoa(sortedPosts[0].id),
+                startCursor: btoa(posts[0].id),
+                endCursor: btoa(posts[7].id),
                 hasPreviousPage: false,
                 hasNextPage: false
               }
@@ -250,13 +232,19 @@ describe('createPagination', () => {
           {
             sliceParams: { last: posts.length + 1 },
             expected: {
-              edges: [...sortedPosts].reverse().map(post => ({
-                node: post,
-                cursor: btoa(post.id)
-              })) as any,
+              edges: [
+                { node: posts[0], cursor: btoa(posts[0].id) },
+                { node: posts[1], cursor: btoa(posts[1].id) },
+                { node: posts[2], cursor: btoa(posts[2].id) },
+                { node: posts[3], cursor: btoa(posts[3].id) },
+                { node: posts[4], cursor: btoa(posts[4].id) },
+                { node: posts[5], cursor: btoa(posts[5].id) },
+                { node: posts[6], cursor: btoa(posts[6].id) },
+                { node: posts[7], cursor: btoa(posts[7].id) },
+              ],
               pageInfo: {
-                startCursor: btoa(sortedPosts.at(-1)!.id),
-                endCursor: btoa(sortedPosts[0]!.id),
+                startCursor: btoa(posts[0].id),
+                endCursor: btoa(posts[7].id),
                 hasPreviousPage: false,
                 hasNextPage: false
               }
@@ -269,22 +257,13 @@ describe('createPagination', () => {
             sliceParams: { last: 3 },
             expected: {
               edges: [
-                {
-                  node: sortedPosts.at(-1),
-                  cursor: btoa(sortedPosts.at(-1)!.id)
-                },
-                {
-                  node: sortedPosts.at(-2),
-                  cursor: btoa(sortedPosts.at(-2)!.id)
-                },
-                {
-                  node: sortedPosts.at(-3),
-                  cursor: btoa(sortedPosts.at(-3)!.id)
-                }
+                { node: posts[0], cursor: btoa(posts[0].id) },
+                { node: posts[1], cursor: btoa(posts[1].id) },
+                { node: posts[2], cursor: btoa(posts[2].id) },
               ],
               pageInfo: {
-                startCursor: btoa(sortedPosts.at(-1)!.id),
-                endCursor: btoa(sortedPosts.at(-3)!.id),
+                startCursor: btoa(posts[0].id),
+                endCursor: btoa(posts[2].id),
                 hasPreviousPage: true,
                 hasNextPage: false,
               }
@@ -300,22 +279,13 @@ describe('createPagination', () => {
             },
             expected: {
               edges: [
-                {
-                  node: sortedPosts.at(-4),
-                  cursor: btoa(sortedPosts.at(-4)!.id)
-                },
-                {
-                  node: sortedPosts.at(-5),
-                  cursor: btoa(sortedPosts.at(-5)!.id)
-                },
-                {
-                  node: sortedPosts.at(-6),
-                  cursor: btoa(sortedPosts.at(-6)!.id)
-                }
+                { node: posts[3], cursor: btoa(posts[3].id) },
+                { node: posts[4], cursor: btoa(posts[4].id) },
+                { node: posts[5], cursor: btoa(posts[5].id) },
               ],
               pageInfo: {
-                startCursor: btoa(sortedPosts.at(-4)!.id),
-                endCursor: btoa(sortedPosts.at(-6)!.id),
+                startCursor: btoa(posts[3].id),
+                endCursor: btoa(posts[5].id),
                 hasPreviousPage: true,
                 hasNextPage: true
               }
@@ -331,22 +301,13 @@ describe('createPagination', () => {
             },
             expected: {
               edges: [
-                {
-                  node: sortedPosts[2],
-                  cursor: btoa(sortedPosts[2].id)
-                },
-                {
-                  node: sortedPosts[1],
-                  cursor: btoa(sortedPosts[1].id)
-                },
-                {
-                  node: sortedPosts[0],
-                  cursor: btoa(sortedPosts[0].id)
-                },
+                { node: posts[5], cursor: btoa(posts[5].id) },
+                { node: posts[6], cursor: btoa(posts[6].id) },
+                { node: posts[7], cursor: btoa(posts[7].id) },
               ],
               pageInfo: {
-                startCursor: btoa(sortedPosts[2].id),
-                endCursor: btoa(sortedPosts[0].id),
+                startCursor: btoa(posts[5].id),
+                endCursor: btoa(posts[7].id),
                 hasPreviousPage: false,
                 hasNextPage: true
               }
@@ -362,22 +323,13 @@ describe('createPagination', () => {
             },
             expected: {
               edges: [
-                {
-                  node: sortedPosts[2],
-                  cursor: btoa(sortedPosts[2].id)
-                },
-                {
-                  node: sortedPosts[1],
-                  cursor: btoa(sortedPosts[1].id)
-                },
-                {
-                  node: sortedPosts[0],
-                  cursor: btoa(sortedPosts[0].id)
-                },
+                { node: posts[5], cursor: btoa(posts[5].id) },
+                { node: posts[6], cursor: btoa(posts[6].id) },
+                { node: posts[7], cursor: btoa(posts[7].id) },
               ],
               pageInfo: {
-                startCursor: btoa(sortedPosts[2].id),
-                endCursor: btoa(sortedPosts[0].id),
+                startCursor: btoa(posts[5].id),
+                endCursor: btoa(posts[7].id),
                 hasPreviousPage: false,
                 hasNextPage: true
               }
@@ -483,16 +435,12 @@ describe('createPagination', () => {
         .limit(pagination.limit)
         .select('id', 'title', 'creation_timestamp');
 
-      console.log(rows)
-
       expect(pagination.getPage(rows)).toEqual(testCase.expected);
     });
   });
 });
 
 /*
-with common-table-expression
-
 obfuscateCursor custom
 deobfuscateCursor custom
 onCursorMissing
