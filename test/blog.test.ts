@@ -418,42 +418,18 @@ describe('createPagination', () => {
           sliceParams: { first: 20 },
           expected: {
             edges: [
-              {
-                node: { ...posts[4], comments_count: '5' },
-                cursor: btoa(posts[4].id)
-              },
-              {
-                node: { ...posts[0], comments_count: '4' },
-                cursor: btoa(posts[0].id)
-              },
-              {
-                node: { ...posts[3], comments_count: '2' },
-                cursor: btoa(posts[3].id)
-              },
-              {
-                node: { ...posts[2], comments_count: '2' },
-                cursor: btoa(posts[2].id)
-              },
-              {
-                node: { ...posts[6], comments_count: '1' },
-                cursor: btoa(posts[6].id)
-              },
-              {
-                node: { ...posts[7], comments_count: '0' },
-                cursor: btoa(posts[7].id)
-              },
-              {
-                node: { ...posts[1], comments_count: '0' },
-                cursor: btoa(posts[1].id)
-              },
-              {
-                node: { ...posts[5], comments_count: '0' },
-                cursor: btoa(posts[5].id)
-              },
+              { node: posts[4], cursor: btoa(posts[4].id) },
+              { node: posts[0], cursor: btoa(posts[0].id) },
+              { node: posts[3], cursor: btoa(posts[3].id) },
+              { node: posts[2], cursor: btoa(posts[2].id) },
+              { node: posts[6], cursor: btoa(posts[6].id) },
+              { node: posts[7], cursor: btoa(posts[7].id) },
+              { node: posts[5], cursor: btoa(posts[5].id) },
+              { node: posts[1], cursor: btoa(posts[1].id) },
             ],
             pageInfo: {
               startCursor: btoa(posts[4].id),
-              endCursor: btoa(posts[5].id),
+              endCursor: btoa(posts[1].id),
               hasPreviousPage: false,
               hasNextPage: false,
             }
@@ -469,18 +445,9 @@ describe('createPagination', () => {
           },
           expected: {
             edges: [
-              {
-                node: { ...posts[2], comments_count: '2' },
-                cursor: btoa(posts[2].id)
-              },
-              {
-                node: { ...posts[6], comments_count: '1' },
-                cursor: btoa(posts[6].id)
-              },
-              {
-                node: { ...posts[7], comments_count: '0' },
-                cursor: btoa(posts[7].id)
-              },
+              { node: posts[2], cursor: btoa(posts[2].id) },
+              { node: posts[6], cursor: btoa(posts[6].id) },
+              { node: posts[7], cursor: btoa(posts[7].id) },
             ],
             pageInfo: {
               startCursor: btoa(posts[2].id),
@@ -495,8 +462,10 @@ describe('createPagination', () => {
 
     test.each(cases)('%s', async (_, testCase) => {
       const cte = db.from('posts')
-        .select('posts.*')
-        .count('comments.id as comments_count')
+        .select(
+          'posts.*',
+          db.raw(`concat(count("comments"."id"), ':', "posts".id) as comments_count`)
+        )
         .leftJoin('comments', 'posts.id', 'comments.post_id')
         .groupBy('posts.id')
         .orderBy('comments_count', 'desc');
@@ -506,29 +475,15 @@ describe('createPagination', () => {
         ...testCase.sliceParams,
       });
 
-      const query = db
+      const rows = await db
         .with('cte', cte)
         .from('cte')
         .where(pagination.where.column, pagination.where.comparator, pagination.where.value)
         .orderBy(pagination.orderBy.column, pagination.orderBy.direction)
         .limit(pagination.limit)
-        .select('*');
+        .select('id', 'title', 'creation_timestamp');
 
-      console.log(query.toSQL().sql);
-      const rows = await query;
-
-      console.log('actual', JSON.stringify(pagination.getPage(rows), null, 2));
-      // console.log('expected', JSON.stringify(testCase.expected, null, 2))
-      // console.log([
-      //   posts[4],
-      //   posts[0],
-      //   posts[3],
-      //   posts[2],
-      //   posts[6],
-      //   posts[7],
-      //   posts[1],
-      //   posts[5]
-      // ])
+      console.log(rows)
 
       expect(pagination.getPage(rows)).toEqual(testCase.expected);
     });
