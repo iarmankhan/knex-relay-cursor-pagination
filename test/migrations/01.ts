@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 
-import { posts, comments } from '../../data';
+import { posts, comments } from '../data';
 
 export async function up(knex: Knex) {
   await knex.schema.createTable('posts', table => {
