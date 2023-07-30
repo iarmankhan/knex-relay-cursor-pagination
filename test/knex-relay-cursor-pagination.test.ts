@@ -1,5 +1,5 @@
 import knex, { Knex } from 'knex';
-import 'pg';
+import { KnexNameUtil } from 'knex-name-util';
 
 import { createPagination, PaginationDatasetParams, ForwardPaginationSliceParams, BackwardPaginationSliceParams, Page } from '../src';
 

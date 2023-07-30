@@ -168,14 +168,17 @@ export function createPagination(params: PaginationParams) {
     throw new Error('invalid state for getRows');
   };
 
-  function getPage<T = unknown>(rows: T[]) {
+  function getPage<T extends Record<string, unknown>, U = T>(rows: U[], opts: { mapItem?: (item: U) => T } = {}): Page<T> {
     const { obfuscateCursor = btoa, onCursorMissing = 'omit' } = params;
+    const { mapItem = (item: U) => item } = opts;
+    const cursorAlias = getAlias(params.cursorColumn);
 
     const [items, adjacentItem] = processItems(rows);
 
     const edges = [];
     for (const item of items) {
-      const cursor = (item as any)[cursorColumn];
+      const cursor = (item as any)[cursorAlias];
+      // console.log({item, cursorAlias, cursor})
       if (cursor === undefined || cursor === null) {
         if (onCursorMissing === 'throw') {
           throw new Error('cursor is missing');
@@ -186,11 +189,12 @@ export function createPagination(params: PaginationParams) {
 
       const edge = {
         cursor: obfuscateCursor(cursor as string),
-        node: item,
+        node: mapItem(item as any),
       };
 
       edges.push(edge);
     }
+
 
     const pageInfo: PageInfo = {
       hasNextPage: paginationSliceParams.direction === 'backward' ? !!before : !!adjacentItem,
@@ -202,7 +206,7 @@ export function createPagination(params: PaginationParams) {
     return {
       edges,
       pageInfo,
-    };
+    } as unknown as Page<T>;
   }
 
   return {
@@ -217,6 +221,14 @@ function getColumn(column: Column): string {
   }
   const aliasedColumn = column as AliasedColumn;
   return aliasedColumn.column;
+}
+
+function getAlias(column: Column): string {
+  if (typeof column === 'string') {
+    return column;
+  }
+  const aliasedColumn = column as AliasedColumn;
+  return aliasedColumn.alias;
 }
 
 function getInternalSliceParams(sliceParams: PaginationSliceParams): InternalSliceParams {
