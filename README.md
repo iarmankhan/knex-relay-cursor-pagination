@@ -1,6 +1,10 @@
 # Knex Relay Cursor Pagination
 
-Easily implement [relay cursor pagination](https://relay.dev/graphql/connections.htm) in your Knex data layer.
+Easy Relay cursor pagination for your Knex queries
+
+- 🚀 implements the [GraphQL Cursor Connections Specification](https://relay.dev/graphql/connections.htm)
+- 🔌 integrates easily with GraphQL tools like Apollo Server
+- 📦 zero dependencies, well-tested with 100% coverage
 
 ## Install
 
@@ -69,4 +73,5 @@ Either `first` or `last` is required
 
 ## Examples
 
-An example app is in the [/example](https://github.com/brietsparks/knex-relay-cursor-pagination/tree/master/example)directory of this repo. See its README.md for more info.
+See the example app in the [/example](https://github.com/brietsparks/knex-relay-cursor-pagination/tree/master/example) directory of this repo. See its README.md for more info.
+
