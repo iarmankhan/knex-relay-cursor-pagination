@@ -99,6 +99,10 @@ type Row = { [key: string]: unknown };
 export function createPagination(params: PaginationParams) {
   const { first, after, last, before } = params;
 
+  if (first === undefined && last === undefined) {
+    throw new Error('pagination requires either a `first` or `last` param');
+  }
+
   const paginationSliceParams = getInternalSliceParams({
     first,
     after,
@@ -195,6 +199,18 @@ export function createPagination(params: PaginationParams) {
     const cursorAlias = getAlias(params.cursorColumn);
 
     const [items, adjacentItem] = processItems(rows);
+
+    if (items.length === 0) {
+      return {
+        edges: [],
+        pageInfo: {
+          hasNextPage: false,
+          hasPreviousPage: false,
+          endCursor: undefined,
+          startCursor: undefined,
+        }
+      };
+    }
 
     const edges = [];
     for (const item of items) {
