@@ -187,7 +187,9 @@ export function createPagination(params: PaginationParams) {
       ];
     }
 
-    throw new Error('the queried row count exceeds the expected limit based on the pagination params');
+    throw new Error(
+      'the queried row count exceeds the expected limit based on the pagination params'
+    );
   };
 
   function getPage<T = Row>(
@@ -208,7 +210,7 @@ export function createPagination(params: PaginationParams) {
           hasPreviousPage: false,
           endCursor: undefined,
           startCursor: undefined,
-        }
+        },
       };
     }
 

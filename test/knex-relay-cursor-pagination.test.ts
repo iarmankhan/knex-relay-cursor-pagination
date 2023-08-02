@@ -403,7 +403,7 @@ describe('createPagination', () => {
           endCursor: btoa(posts[2].id),
           hasPreviousPage: false,
           hasNextPage: true,
-        }
+        },
       });
     });
 
@@ -438,7 +438,7 @@ describe('createPagination', () => {
           endCursor: btoa(posts[7].id),
           hasPreviousPage: true,
           hasNextPage: false,
-        }
+        },
       });
     });
   });
@@ -622,7 +622,7 @@ describe('createPagination', () => {
       sortDirection: 'desc',
       cursorColumn: 'id',
       first: 2,
-      after: btoa('99999999-9999-9999-9999-999999999999')
+      after: btoa('99999999-9999-9999-9999-999999999999'),
     });
 
     const rows = await db
@@ -643,19 +643,22 @@ describe('createPagination', () => {
         endCursor: undefined,
         hasPreviousPage: false,
         hasNextPage: false,
-      }
+      },
     });
   });
 
   test('throw if no slice params', () => {
-    const testCase = () => createPagination({
-      from: 'posts',
-      sortColumn: 'creation_timestamp',
-      sortDirection: 'desc',
-      cursorColumn: 'id',
-    });
+    const testCase = () =>
+      createPagination({
+        from: 'posts',
+        sortColumn: 'creation_timestamp',
+        sortDirection: 'desc',
+        cursorColumn: 'id',
+      });
 
-    expect(testCase).toThrow(new Error('pagination requires either a `first` or `last` param'));
+    expect(testCase).toThrow(
+      new Error('pagination requires either a `first` or `last` param')
+    );
   });
 
   test('custom obfuscateCursor and deobfuscateCursor', async () => {
@@ -665,8 +668,8 @@ describe('createPagination', () => {
       sortDirection: 'desc',
       cursorColumn: 'id',
       first: 3,
-      obfuscateCursor: s => s,
-      deobfuscateCursor: s => s,
+      obfuscateCursor: (s) => s,
+      deobfuscateCursor: (s) => s,
     });
 
     const rows = await db
@@ -692,7 +695,7 @@ describe('createPagination', () => {
         hasPreviousPage: false,
         hasNextPage: true,
       },
-    })
+    });
   });
 
   test('omit item onCursorMissing', async () => {
@@ -738,7 +741,7 @@ describe('createPagination', () => {
       sortDirection: 'desc',
       cursorColumn: 'id',
       first: 3,
-      onCursorMissing: 'throw'
+      onCursorMissing: 'throw',
     });
 
     const rows = await db
@@ -785,6 +788,10 @@ describe('createPagination', () => {
 
     const testCase = () => pagination.getPage(rows);
 
-    expect(testCase).toThrow(new Error('the queried row count exceeds the expected limit based on the pagination params'));
+    expect(testCase).toThrow(
+      new Error(
+        'the queried row count exceeds the expected limit based on the pagination params'
+      )
+    );
   });
 });
