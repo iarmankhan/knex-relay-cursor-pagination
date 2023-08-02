@@ -187,7 +187,7 @@ export function createPagination(params: PaginationParams) {
       ];
     }
 
-    throw new Error('invalid state for getRows');
+    throw new Error('the queried row count exceeds the expected limit based on the pagination params');
   };
 
   function getPage<T = Row>(
@@ -240,8 +240,8 @@ export function createPagination(params: PaginationParams) {
         paginationSliceParams.direction === 'forward'
           ? !!after
           : !!adjacentItem,
-      startCursor: edges.length ? edges[0].cursor : undefined,
-      endCursor: edges.length ? edges[edges.length - 1].cursor : undefined,
+      startCursor: edges[0].cursor,
+      endCursor: edges[edges.length - 1].cursor,
     };
 
     return {
@@ -303,11 +303,7 @@ function getSortDirection(
     return 'asc';
   }
 
-  if (specifiedSortDirection === 'asc') {
-    return 'desc';
-  }
-
-  throw new Error('unknown state for getSortDirection');
+  return 'desc';
 }
 
 type Comparator = '<' | '>';
@@ -325,14 +321,9 @@ function getComparator(
     }
   }
 
-  if (specifiedSortDirection === 'asc') {
-    if (paginationDirection === 'forward') {
-      return '>';
-    }
-    if (paginationDirection === 'backward') {
-      return '<';
-    }
+  if (paginationDirection === 'forward') {
+    return '>';
   }
 
-  throw new Error('unknown state for getComparator');
+  return '<';
 }
